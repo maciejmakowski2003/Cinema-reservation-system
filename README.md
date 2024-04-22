@@ -9,7 +9,7 @@
 - Node.js(Express)
 - React(Ts)
 
-[Link to github](https://github.com/maciejmakowski2003/Cinema-reservation-system)
+[github](https://github.com/maciejmakowski2003/Cinema-reservation-system)
 
 ### DB scheme 
 
@@ -48,23 +48,30 @@
             "close": "closed"
         }
     },
-    "halls": [
-        "1": {
-            "rows": [
-                {
-                    "row_number": "A",
-                    "seats_number": 30
-                },
-                {
-                    "row_number": "B",
-                    "seats_number": 30
-                }
-            ]
+    "halls": List<ObjectId>
+   }
+   ```
+3. hall 
+   ```js
+   {
+    "_id": ObjectId,
+    "cinema_id": ObjectId,
+    "seats": [
+        {
+            "row": "A",
+            "seat_number": 15
+            "type": "standard"
+        },
+        {
+            "row": "F",
+            "seat_number": 15
+            "type": "vip"
         }
     ]
    }
    ```
-3. film
+
+4. film
  - each document stores data about film and its reviews
    ```js
    {
@@ -75,7 +82,7 @@
     "reviews": [7,7,10,7,10,10]//from 1 to 10
    }
    ```
-4. showing
+5. showing
    - each document stores data about single showing 
     ```js
     {
@@ -83,26 +90,57 @@
         "cinema_id": ObjectId, 
         "film_id": ObjectId,
         "start_date": Date, //includes both date and time
-        "hall": 3
+        "hall": 3,
+        "price": {
+            "standard": 17.99,
+            "vip": 25.99
+        },
+        "format": {
+            "type": "2D",
+            "language": "voiceover"//voiceover, dubbing or subtitles
+        },
         "seats": [
             {
                 "row_number": "A",
                 "seat_number": 15,
-                "price": 21.99,
+                "type": "standard",
                 "occupied": false
             },
             {
-                "row_number": "F",
+                "row": "F",
                 "seat_number": 17,
-                "price": 21.99,
+                "type": "vip",
                 "occupied": true
             }
         ]
     }
     ```
-5. order
+6. order
    ```js
    {
+    "_id": ObjectId,
     "user_id": ObjectId,
+    "showing_id": ObjectId,
+    "tickets":[
+        {
+            "row": "F",
+            "seat_number": 15,
+            "type": "vip"
+        },
+        {
+            "row": "F",
+            "seat_number": 16,
+            "type": "vip"
+        }
+    ],
+    "total_price": 51.98
    }
    ```
+
+### Opreations on DB
+- CRUD cinema, film, hall, showing, user
+- place an order(update seats occupation to true, create order)
+- monthly income for each cinema and total
+- showtimes for each day in each cinema
+- showings for each film in each cinema
+- access control to available seats
