@@ -14,18 +14,18 @@
 ### DB scheme 
 
 1. user
-   - each document stores information about single user 
+   - each document stores information about single user.
    ```js
    {
     "_id": ObjectId, 
-    "username": "adam_kowalski",
     "email": "adam@gmail.com",
-    "password": "hashedpassowrd", 
+    "password": "hashedpassowrd"
    }
    ```
 
 2. cinema
-   - each document represents cinema
+   - each document represents single cinema.
+   - if it is open on particular day, field open and close will contain hours. if not, they will be set to closed.
    ```js
    {
     "_id": ObjectId, 
@@ -37,7 +37,7 @@
         "state": "małopolska",
         "country": "Polska",
         "zipcode": "31116"
-    }
+    },
     "opening_hours": {
         "monday": {
             "open": "09:00", 
@@ -51,7 +51,9 @@
     "halls": List<ObjectId>
    }
    ```
-3. hall 
+3. hall
+   - each document represent single hall
+   - each seat can be standard or vip
    ```js
    {
     "_id": ObjectId,
@@ -71,25 +73,30 @@
    }
    ```
 
-4. film
- - each document stores data about film and its reviews
+4. movie
+   - each document stores data about single movie
+   - reviews from 1 to 10 
+   - runtime in minutes
    ```js
    {
     "_id": ObjectId,
     "name": "Incepcja",
     "description": "description",
-    "runtime": "123 min",
-    "reviews": [7,7,10,7,10,10]//from 1 to 10
+    "runtime": 123,
+    "reviews": [7,7,10,7,10,10]
    }
    ```
 5. showing
    - each document stores data about single showing 
+   - start_date includes both date and time
+   - format stores data about if film is in 2d or 3d and if it has voiceover, subtitles or dubbing
+   - seats object stores data about all seats in hall: row, number, type and info if it is occupied
     ```js
     {
         "_id": ObjectId
         "cinema_id": ObjectId, 
-        "film_id": ObjectId,
-        "start_date": Date, //includes both date and time
+        "movie_id": ObjectId,
+        "start_date": Date, 
         "hall": 3,
         "price": {
             "standard": 17.99,
@@ -97,7 +104,7 @@
         },
         "format": {
             "type": "2D",
-            "language": "voiceover"//voiceover, dubbing or subtitles
+            "language": "voiceover"
         },
         "seats": [
             {
@@ -116,6 +123,9 @@
     }
     ```
 6. order
+   - stores data about single order
+   - order can only include tickets for the same showing
+   - stores info about tickets(row, number, type) and total price of tickets
    ```js
    {
     "_id": ObjectId,
@@ -138,8 +148,10 @@
    ```
 
 ### Opreations on DB
-- CRUD cinema, film, hall, showing, user
+- CRUD cinema, film, hall, showing(only on backend)
+- CRUD user
 - place an order(update seats occupation to true, create order)
+- avg review of movie
 - monthly income for each cinema and total
 - showtimes for each day in each cinema
 - showings for each film in each cinema
