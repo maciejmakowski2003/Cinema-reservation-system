@@ -30,7 +30,7 @@
    {
     "_id": ObjectId, 
     "name": "Multikino",
-    "phone": "+48556752999", 
+    "email": "multikino.krakow@gmail.com", 
     "address": {
         "street": "Bora Komorowskiego 13",
         "city": "Kraków",
@@ -62,12 +62,14 @@
         {
             "row": "A",
             "seat_number": 15
-            "type": "standard"
+            "type": "standard",
+            "occupied": false
         },
         {
             "row": "F",
             "seat_number": 15
-            "type": "vip"
+            "type": "vip",
+            "occupied": false
         }
     ]
    }
@@ -80,7 +82,7 @@
    ```js
    {
     "_id": ObjectId,
-    "name": "Incepcja",
+    "title": "Incepcja",
     "description": "description",
     "runtime": 123,
     "reviews": [7,7,10,7,10,10]
@@ -89,7 +91,7 @@
 5. showing
    - each document stores data about single showing 
    - start_date includes both date and time
-   - format stores data about if film is in 2d or 3d and if it has voiceover, subtitles or dubbing
+   - format stores data about if film is in 2d, 3d or 4d and if it is subtitled, dubbed, orginal or has voiceover
    - seats object stores data about all seats in hall: row, number, type and info if it is occupied
     ```js
     {
