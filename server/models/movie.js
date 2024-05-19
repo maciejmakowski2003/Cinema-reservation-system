@@ -25,4 +25,11 @@ const movieSchema = new Schema({
     }
 });
 
+movieSchema.statics.findByAverageReviewScore = function(score) {
+    return this.aggregate([
+        { $addFields: { averageReview: { $avg: "$reviews" } } },
+        { $match: { averageReview: { $gte: score } } }
+    ]);
+};
+
 module.exports = mongoose.model('Movie', movieSchema);

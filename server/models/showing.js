@@ -18,7 +18,7 @@ const showingSchema = new Schema({
         type: Date,
         required: true,
     },
-    hall: {
+    hall_id: {
         type: Schema.Types.ObjectId,
         ref: 'Hall',
         required: true,
@@ -50,3 +50,18 @@ const showingSchema = new Schema({
         required: true,
     },
 });
+
+showingSchema.statics.findByCinemaIdAndDate = function(cinema_id, date) {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return this.find({ cinema_id, start_date: { $gte: startOfDay, $lt: endOfDay } })
+        .sort({ name: 1, start_date: 1 });
+};
+
+showingSchema.index({ cinema_id: 1, movie_id: 1, start_date: 1 }, { unique: true })
+
+module.exports = mongoose.model('Showing', showingSchema);

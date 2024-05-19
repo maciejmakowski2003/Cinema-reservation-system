@@ -1,19 +1,21 @@
 require('dotenv').config();
 
 const express = require('express');
+const mongoose = require('mongoose');
+const dbConnection = require('./config/db');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const userRouter = require('./routes/user'); 
+
 const app = express();
 const PORT = process.env.PORT;
 
-const mongoose = require('mongoose');
-const db = require('./config/db');
-const Movie = require('./model/movie');
-
-const morgan = require('morgan'); 
 app.use(morgan('tiny'));
+app.use(bodyParser.json());
 
+dbConnection(mongoose);
 
-db(mongoose);
-
+app.use(userRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
