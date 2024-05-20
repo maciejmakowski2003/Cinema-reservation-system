@@ -1,0 +1,75 @@
+#seatPicker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.seat {
+    transition: .3s;
+    font-family: monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 2px;
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    background-color: #626262;
+    padding: 5px 7px;
+    width: 25px;
+    height: 23px;
+    color: white;
+
+    p {
+        margin: 0;
+        padding: 0;
+        font-size: 13px;
+
+        sup {
+            font-size: 18px;
+        }
+    }
+
+}
+
+.seat:hover {
+    transition: .3s;
+    cursor: pointer;
+    background-color: #7bc47f;
+    color: black;
+}
+
+.seat-selected {
+    background-color: #7bc47f;
+    color: black;
+}
+
+.seat-offset {
+    margin-left: 50px;
+}
+
+.seat-occupied {
+    background-color: #cfcfcf;
+    color: black;
+}
+
+.seat-occupied:hover {
+    background-color: #cfcfcf;
+    cursor: not-allowed;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+
+#screen {
+    height: 70px;
+    background: white;
+    width: 100%;
+    transform: rotateX(-30deg) scale(1.1);
+    box-shadow: 0 3px 10px 2px white;
+    margin-bottom: 20px;
+}
