@@ -13,7 +13,7 @@ class MovieUtils {
         }
     }
 
-    async addReview(movie_id, score) {        
+    async addReview(movie_id, score) { 
         try {
             const movie = await this.Movie.findById(movie_id);
             movie.reviews.push(score);

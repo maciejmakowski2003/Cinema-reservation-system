@@ -13,13 +13,19 @@ const validateReview = {
 const movieSchema = new Schema({
     title: {
         type: String,
-        required: true,
+        required: [true, 'Please provide the movie title'],
     },
-    description: String,
-    runtime: Number,
+    description: {
+        type: String,
+        required: [true, 'Please provide the movie description']
+    },
+    runtime: {
+        type: Number,
+        required: [true, 'Please provide the runtime of the movie']
+    },
     reviews: {
         type: [Number],
-        required: true,
+        required: [true, 'Please provide reviews for the movie'],
         default: [],
         validate: validateReview,
     }
