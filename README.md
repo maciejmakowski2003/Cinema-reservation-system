@@ -211,7 +211,7 @@
    - start_date includes both date and time
    - format stores data about if film is in 2d, 3d or 4d and if it is subtitled, dubbed, orginal or has voiceover
    - seats object stores data about all seats in hall: row, number, type and info if it is occupied
-    ```js
+   ```js
     const showingSchema = new Schema({
         cinema_id: {
             type: Schema.Types.ObjectId,
