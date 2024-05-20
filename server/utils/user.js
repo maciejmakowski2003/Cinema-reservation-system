@@ -1,5 +1,6 @@
 const {createToken} = require('../utils/token');
 const AppError = require('../utils/error');
+const mongoose = require('mongoose');
 
 class UserUtils {
     constructor(User, Showing) {
@@ -57,31 +58,43 @@ class UserUtils {
     }
 
     async addToCart(user_id, showing_id, seats) {
-        const user = await this.User.findById(user_id);
-        if (!user) {
-            throw new AppError(`User with id: ${user_id} not found`, 404);
-        }
-
-        const showing = await this.Showing.findById(showing_id);
-        if (!showing) {
-            throw new Error(`Showing with id: ${showing_id} not found`);
-        }
-
-        const showingSeats = showing.seats;
-
-        for (let seat of seats) {
-            const seatIndex = showingSeats.findIndex(s => s.row === seat.row && s.number === seat.number);
-            if (seatIndex === -1) {
-                throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
+        const session = await mongoose.startSession();
+        session.startTransaction();
+    
+        try {
+            const user = await this.User.findById(user_id).session(session);
+            if (!user) {
+                throw new AppError(`User with id: ${user_id} not found`, 404);
             }
-
-            if (showingSeats[seatIndex].occupied) {
-                throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
+    
+            const showing = await this.Showing.findById(showing_id).session(session);
+            if (!showing) {
+                throw new AppError(`Showing with id: ${showing_id} not found`, 404);
             }
+    
+            const showingSeats = showing.seats;
+    
+            for (let seat of seats) {
+                const seatIndex = showingSeats.findIndex(s => s.row === seat.row && s.number === seat.number);
+                if (seatIndex === -1) {
+                    throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
+                }
+    
+                if (showingSeats[seatIndex].occupied) {
+                    throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
+                }
+            }
+    
+            user.cart = { showing_id, seats };
+            await user.save({ session });
+    
+            await session.commitTransaction();
+            session.endSession();
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+            throw new AppError(error, 400);
         }
-
-        user.cart = { showing_id, seats };
-        await user.save();
     }
 }
 
