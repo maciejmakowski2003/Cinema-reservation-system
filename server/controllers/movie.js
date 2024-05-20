@@ -8,7 +8,7 @@ const getMovies = async (req, res) => {
         const movies = await Movie.find();
         res.status(200).json(movies);
     } catch (error) {
-        res.status(error.status).json({ message: error.message });
+        res.status(error.status || 400).json({ message: error.message });
     }
 }
 
@@ -30,7 +30,7 @@ const getMoviesByReviewScore = async (req, res) => {
 
         res.status(200).json(movies);
     } catch (error) {
-        res.status(error.status).json({ message: error.message });
+        res.status(error.status || 400).json({ message: error.message });
     }
 }
 

@@ -206,78 +206,74 @@
         }
     });
    ```
-#### 5. showing //TODO
+#### 5. showing 
    - each document stores data about single showing 
    - start_date includes both date and time
    - format stores data about if film is in 2d, 3d or 4d and if it is subtitled, dubbed, orginal or has voiceover
    - seats object stores data about all seats in hall: row, number, type and info if it is occupied
-    ```js
+```js
     const showingSchema = new Schema({
         cinema_id: {
             type: Schema.Types.ObjectId,
             ref: 'Cinema',
-            required: true,
+            required: [true, 'Cinema ID is required'],
         },
         movie_id: {
             type: Schema.Types.ObjectId,
             ref: 'Movie',
-            required: true,
+            required: [true, 'Movie ID is required'],
+        },
+        movie_name: {
+            type: String,
+            required: [true, 'Movie name is required'],
         },
         start_date: {
             type: Date,
-            required: true,
+            required: [true, 'Start date is required'],
         },
         hall_id: {
             type: Schema.Types.ObjectId,
             ref: 'Hall',
-            required: true,
+            required: [true, 'Hall ID is required'],
         },
         price: {
             standard: {
                 type: Number,
-                required: true,
+                required: [true, 'Standard price is required'],
             },
             vip: {
                 type: Number,
-                required: true,
+                required: [true, 'VIP price is required'],
             },
         },
         format: {
             type: {
                 type: String,
-                enum: ['2D', '3D', '4D'],
-                required: true,
+                enum: {
+                    values: ['2D', '3D', '4D'],
+                    message: 'Format type must be either 2D, 3D, or 4D',
+                },
+                required: [true, 'Format type is required'],
             },
             language: {
                 type: String,
-                enum: ['subtitled', 'dubbed', 'original', 'voiceover'],
-                required: true,
+                enum: {
+                    values: ['subtitled', 'dubbed', 'original', 'voiceover'],
+                    message: 'Language must be subtitled, dubbed, original, or voiceover',
+                },
+                required: [true, 'Language is required'],
             }
         },
         seats: {
             type: [seatScheme],
-            required: true,
+            required: [true, 'Seats are required'],
         },
     });
 
-    const seatScheme = new Schema({
-        row: {
-            type: String,
-            enum: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'],
-            required: true,
-        },
-        number: {
-            type: String,
-            required: true,
-        },
-        type: {
-            type: String,
-            enum: ['vip', 'standard'],
-            required: true,
-        },
-        occupied: Boolean,
-    });
-    ```
+```
+```js
+    showingSchema.index({ cinema_id: 1, movie_id: 1, start_date: 1 }, { unique: true })
+```
 #### 6. order //TODO
    - stores data about single order
    - order can only include tickets for the same showing
@@ -528,7 +524,59 @@
         }
     }
 ```
-#### 5. showing //TODO
+#### 5. showing
+```js
+    showingSchema.statics.findByCinemaAndDate = function(cinema_id, date) {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        return this.find({ cinema_id, start_date: { $gte: startOfDay, $lt: endOfDay } })
+            .sort({ movie_name: 1, start_date: 1 }).select({ seats: 0 });
+    };
+```
+```js
+    async createShowing(cinema_id, movie_id, start_date, hall_id, price, format) {
+        try {
+            const movie = await this.Movie.findById(movie_id);
+            const hall = await this.Hall.findById(hall_id);
+            const showing = await this.Showing.create({ cinema_id, movie_id, movie_name: movie.title, start_date, hall_id, price, format, seats: hall.seats });
+            return showing;
+        } catch (error) {
+            throw new AppError(error, 400);
+        }
+    }
+```
+```js
+    async getShowingsByCinemaAndDate(cinema_id, date) {
+        return await this.Showing.findByCinemaAndDate(cinema_id, date);
+    }
+```
+```js
+    async getShowingsByCinemaMovieDate(cinema_id, movie_name, date) {
+        const showings = await this.getShowingsByCinemaAndDate(cinema_id, date);
+        return showings.filter(showing => showing.movie_name === movie_name);
+    }
+```
+```js
+    async getHallSizeByShowingId(showing_id) {
+        const showing = await this.Showing.findById(showing_id);
+        let dict = {};
+        for (let seat of showing.seats) {
+            if (dict[seat.row] === undefined) {
+                dict[seat.row] = 0;
+            }
+            dict[seat.row]++;
+        }
+
+        return {
+            "hall_size": dict,
+            "seats": showing.seats.sort((a, b) => a.row - b.row || a.number - b.number)
+        }
+    }
+```
 #### 6. order //TODO
 
 
@@ -883,13 +931,147 @@ Result:
     }
 ]
 ```
+#### 4. showing
+```js
+    API_ROUTE = /showings
+```
 
-   
+    Endpoint:
+```js
+    GET ${API_ROUTE}/cinema/:cinema_id/date/:date
+```
+Result:
+```js
+[
+  {
+    "price": {
+      "standard": 19.99,
+      "vip": 28.5
+    },
+    "format": {
+      "type": "2D",
+      "language": "subtitled"
+    },
+    "_id": "664b943fabf6ae3d036b2331",
+    "cinema_id": "664b18c132cfeae096d90a5b",
+    "movie_id": "664b2d93e6922309f8189d4d",
+    "movie_name": "Inception",
+    "start_date": "2024-06-07T16:00:00.000Z",
+    "hall_id": "664b1d6df55c10ffcb7d7f60",
+    "__v": 0
+  },
+  {
+    "price": {
+      "standard": 19.99,
+      "vip": 28.5
+    },
+    "format": {
+      "type": "2D",
+      "language": "subtitled"
+    },
+    "_id": "664b943fabf6ae3d036b2333",
+    "cinema_id": "664b18c132cfeae096d90a5b",
+    "movie_id": "664b2d93e6922309f8189d4d",
+    "movie_name": "Inception",
+    "start_date": "2024-06-07T21:00:00.000Z",
+    "hall_id": "664b1d6df55c10ffcb7d7f60",
+    "__v": 0
+  },
+]
+```
+
+    Endpoint:
+```js
+    GET ${API_ROUTE}/cinema/:cinema_id/movie/:movie_name/date/:date
+```
+Result:
+```js
+[
+  {
+    "price": {
+      "standard": 19.99,
+      "vip": 28.5
+    },
+    "format": {
+      "type": "2D",
+      "language": "subtitled"
+    },
+    "_id": "664b943fabf6ae3d036b2331",
+    "cinema_id": "664b18c132cfeae096d90a5b",
+    "movie_id": "664b2d93e6922309f8189d4d",
+    "movie_name": "Inception",
+    "start_date": "2024-06-07T16:00:00.000Z",
+    "hall_id": "664b1d6df55c10ffcb7d7f60",
+    "__v": 0
+  },
+  {
+    "price": {
+      "standard": 19.99,
+      "vip": 28.5
+    },
+    "format": {
+      "type": "2D",
+      "language": "subtitled"
+    },
+    "_id": "664b943fabf6ae3d036b2333",
+    "cinema_id": "664b18c132cfeae096d90a5b",
+    "movie_id": "664b2d93e6922309f8189d4d",
+    "movie_name": "Inception",
+    "start_date": "2024-06-07T21:00:00.000Z",
+    "hall_id": "664b1d6df55c10ffcb7d7f60",
+    "__v": 0
+  },
+]
+```
+
+    Endpoint:
+```js
+    GET ${API_ROUTE}/hall/:showing_id
+```
+Result:
+```js
+{
+  "hall_size": {
+    "A": 20,
+    "B": 20,
+    "C": 20,
+    "D": 20,
+    "E": 20,
+    "F": 20,
+    "G": 20,
+    "H": 20,
+    "I": 20,
+    "J": 20,
+    "K": 20,
+    "L": 20,
+    "M": 20,
+    "N": 20
+  },
+  "seats": [
+    {
+      "row": "A",
+      "number": "0",
+      "type": "standard",
+      "occupied": false
+    },
+    {
+      "row": "B",
+      "number": "0",
+      "type": "standard",
+      "occupied": false
+    },
+    {
+      "row": "C",
+      "number": "0",
+      "type": "standard",
+      "occupied": false
+    },
+    ...
+  ]
+}
+```   
 
 ### TODO
-- CRUD movie, showing(only on backend)
 - place an order(update seats occupation to true, create order)
 - monthly income for each cinema and total
-- showtimes for each day in each cinema
-- showings for each film in each cinema
 - access control to available seats
