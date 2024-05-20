@@ -28,7 +28,8 @@ const userSchema = new Schema({
     cart: {
         showing_id: {
             type: Schema.Types.ObjectId,
-            ref: 'Showing'
+            ref: 'Showing',
+            default: null
         },
         seats: {
             type: [seatScheme],

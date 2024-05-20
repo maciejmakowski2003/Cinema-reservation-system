@@ -20,12 +20,13 @@ const seatScheme = new Schema({
             values: ['vip', 'standard'],
             message: '{VALUE} is not a valid seat type'
         },
+        default: 'standard',
         required: [true, 'Please provide the type of the seat'],
     },
     occupied: {
         type: Boolean,
         default: false,
     }
-});
+},{ _id : false});
 
 module.exports = seatScheme;

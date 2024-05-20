@@ -2,7 +2,6 @@ const {Router} = require('express');
 const {signup, login, updatePassword, getCart, addToCart} = require('../controllers/user');
 const {authenticate} = require('../middleware/auth');
 const router = Router();
-
 const API_ROUTE = '/users';
 
 router.post(`${API_ROUTE}/signup`, signup);

@@ -1,9 +1,13 @@
 const AppError = require('../utils/error');
+const mongoose = require('mongoose');
+const HallUtils = require('./hall');
 
 class CinemaUtils {
-    constructor(Cinema, Showing) {
+    constructor(Cinema, Showing, Hall) {
         this.Cinema = Cinema;
         this.Showing = Showing;
+        this.Hall = Hall;
+        this.hallUtils = new HallUtils(Hall);
     }
 
     async createCinema(name, email, address, hours) {
@@ -12,20 +16,31 @@ class CinemaUtils {
             const cinema = await this.Cinema.create({ name, email, address, opening_hours });
             return cinema;
         } catch (error) {
-            throw new AppError(error.message, 400);
+            throw new AppError(error, 400);
         }
     }
 
-    async addHall(cinema_id, hall_id) {
-        const cinema = await this.Cinema.findById(cinema_id);
-        if (!cinema) {
-            throw new AppError(`Cinema with id: ${cinema_id} not found`, 404);
+    async createAndAddHall(name, cinema_id, rows, seatsPerRow) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            const newHall = await this.hallUtils.createHall(name, cinema_id, rows, seatsPerRow);
+            const savedHall = await newHall.save({ session });
+
+            await this.Cinema.findByIdAndUpdate(
+                cinema_id,
+                { $push: { halls: savedHall._id } },
+                { new: true, session }
+            );
+
+            await session.commitTransaction();
+            session.endSession();
+        } catch(error) {
+            await session.abortTransaction();
+            session.endSession();
+            throw new AppError(error, 400);
         }
-
-        cinema.halls.push(hall_id);
-        await cinema.save();
-
-        return cinema;
     }
 
     generateOpeningHours(hours) {
