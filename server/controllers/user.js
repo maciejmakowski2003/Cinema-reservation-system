@@ -58,15 +58,6 @@ const addToCart = async (req, res) => {
     }
 }
 
-// const verifyUser = async (req, res) => {
-//     try {
-//         const user = await User.findById(req.user_id);
-//         res.status(200).json(user);
-//     } catch(error) {
-//         res.status(error.status).json({ message: error.message });
-//     }
-// };
-
 module.exports = {
     signup,
     login,
