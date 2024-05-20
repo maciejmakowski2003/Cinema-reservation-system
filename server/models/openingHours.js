@@ -23,7 +23,7 @@ const timeSchema = new Schema({
             message: props => `${props.value} is not a valid hour format (HH:MM)`
         }
     },
-});
+},{ _id : false});
 
 const openingHoursSchema = new Schema({
     monday: timeSchema,
@@ -33,6 +33,6 @@ const openingHoursSchema = new Schema({
     friday: timeSchema,
     saturday: timeSchema,
     sunday: timeSchema,
-});
+},{ _id : false});
 
 module.exports = openingHoursSchema;
