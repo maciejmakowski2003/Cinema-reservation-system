@@ -269,9 +269,8 @@
     },{timestamps: true});
    ```
 
-### Opreations on DB
-- CRUD cinema, film, hall, showing(only on backend)
-- CRUD user
+### TODO
+- CRUD movie, showing(only on backend)
 - place an order(update seats occupation to true, create order)
 - avg review of movie
 - monthly income for each cinema and total
