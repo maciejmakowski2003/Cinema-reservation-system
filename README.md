@@ -673,17 +673,30 @@ Endpoint:
 ```
 Headers:
 ```js
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGIzNmM2NGEwNjIxZGYyZTMxZGQzOCIsImlhdCI6MTcxNjIwNTQyNiwiZXhwIjoxNzE2NDY0NjI2fQ.zi0UNmCzz9UcarmtAC-dkWxDEq9VXAHxotJwMNuHVF0
+    authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGIzNmM2NGEwNjIxZGYyZTMxZGQzOCIsImlhdCI6MTcxNjIwNTQyNiwiZXhwIjoxNzE2NDY0NjI2fQ.zi0UNmCzz9UcarmtAC-dkWxDEq9VXAHxotJwMNuHVF0
 ```
 Result:
 ```js
 {
-    "showing_id": null,
-    "seats": []
+  "showing_id": "664b934f13a8d8ec6a9051cd",
+  "seats": [
+    {
+      "row": "A",
+      "number": "0",
+      "type": "standard",
+      "occupied": false
+    },
+    {
+      "row": "A",
+      "number": "1",
+      "type": "standard",
+      "occupied": false
+    }
+  ]
 }
 ```
 
-##### Add to cart //TODO
+##### Add to cart
 Endpoint:
 ```js
     POST ${API_ROUTE}/cart
@@ -691,7 +704,18 @@ Endpoint:
 Body:
 ```js
 {
-    
+  "showing_id": "664b934f13a8d8ec6a9051cd",
+  "seats": 
+  [
+      {
+        "row": "A",
+        "number": 0
+      },
+      {
+        "row": "A",
+        "number": 1
+      }
+  ]
 }
 ```
 Headers:
@@ -700,7 +724,9 @@ authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGIzNmM2N
 ```
 Result:
 ```js
-
+{
+  "message": "Seats added to cart"
+}
 ```
 #### 2. cinema
 ```js

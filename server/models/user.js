@@ -18,7 +18,7 @@ const userSchema = new Schema({
             required: [true, 'Please provide user password'],
             trim: [true, 'User password cannot have spaces at the beginning and at the end'],
             minlength: [8, 'User password must contain at least 8 characters'],
-            maxlength: [48, 'User password must contain at most 48 characters'],
+            maxlength: [120, 'User password must contain at most 120 characters'],
     },
     role: {
         type: String,

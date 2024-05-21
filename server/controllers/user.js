@@ -48,9 +48,8 @@ const getCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
     try {
-        const { user_id } = req.user_id;
         const { showing_id, seats } = req.body;
-        await userUtils.addToCart(user_id, showing_id, seats);
+        await userUtils.addToCart(req.user_id, showing_id, seats);
 
         res.status(200).json({ message: 'Seats added to cart' });
     } catch (error) {

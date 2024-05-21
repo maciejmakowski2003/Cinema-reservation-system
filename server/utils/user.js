@@ -49,6 +49,7 @@ class UserUtils {
     }
 
     async getCart(user_id) {
+        console.log(user_id);
         const user = await this.User.findById(user_id).select('cart');
         if (!user) {
             throw new AppError(`User with id: ${user_id} not found`, 404);
@@ -75,7 +76,7 @@ class UserUtils {
             const showingSeats = showing.seats;
     
             for (let seat of seats) {
-                const seatIndex = showingSeats.findIndex(s => s.row === seat.row && s.number === seat.number);
+                const seatIndex = showingSeats.findIndex(s => s.row == seat.row && s.number == seat.number);
                 if (seatIndex === -1) {
                     throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
                 }
@@ -84,8 +85,10 @@ class UserUtils {
                     throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
                 }
             }
+
+            user.cart = {};
     
-            user.cart = { showing_id, seats };
+            user.cart = { showing_id, seats,  };
             await user.save({ session });
     
             await session.commitTransaction();
