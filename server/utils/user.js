@@ -73,9 +73,12 @@ class UserUtils {
             }
     
             const showingSeats = showing.seats;
+            const showingPrice = showing.price;
+            let chosenSeats = [];
+            let totalPrice = 0;
     
             for (let seat of seats) {
-                const seatIndex = showingSeats.findIndex(s => s.row === seat.row && s.number === seat.number);
+                const seatIndex = showingSeats.findIndex(s => s.row == seat.row && s.number == seat.number);
                 if (seatIndex === -1) {
                     throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
                 }
@@ -83,9 +86,12 @@ class UserUtils {
                 if (showingSeats[seatIndex].occupied) {
                     throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
                 }
+
+                totalPrice += showingPrice[showingSeats[seatIndex].type];
+                chosenSeats.push(showingSeats[seatIndex]);
             }
     
-            user.cart = { showing_id, seats };
+            user.cart = { showing_id, seats: chosenSeats, total_price: totalPrice.toFixed(2)};
             await user.save({ session });
     
             await session.commitTransaction();
