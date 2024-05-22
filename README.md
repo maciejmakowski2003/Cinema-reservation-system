@@ -291,7 +291,7 @@
    - stores data about single order
    - order can only include tickets for the same showing
    - stores info about tickets(row, number, type) and total price of tickets
-   ```js
+```js
     const priceValidator = {
         validator: function (value) {
             return value >= 0;
@@ -304,24 +304,54 @@
         user_id: {
             type: Schema.Types.ObjectId,
             ref: 'User',
-            required: true,
+            required: [true, 'User ID is required.']
         },
         showing_id: {
             type: Schema.Types.ObjectId,
             ref: 'Showing',
-            required: true,
+            required: [true, 'Showing ID is required.']
         },
         tickets: {
-            type: [seatScheme],
-            required: true,
+            type: [seatSchema],
+            required: [true, 'At least one ticket is required.']
         },
         total_price: {
             type: Number,
-            required: true,
+            required: [true, 'Total price is required.'],
             validate: priceValidator,
+            default: 0
+        }
+    }, { timestamps: true });
+```
+```js
+    const seatScheme = new Schema({
+        row: {
+            type: String,
+            enum: {
+                values: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'],
+                message: '{VALUE} is not a valid seat type'
+            },
+            required: [true, 'Please provide the row of the seat'],
         },
-    },{timestamps: true});
-   ```
+        number: {
+            type: String,
+            required: [true, 'Please provide the seat number'],
+        },
+        type: {
+            type: String,
+            enum: {
+                values: ['vip', 'standard'],
+                message: '{VALUE} is not a valid seat type'
+            },
+            default: 'standard',
+            required: [true, 'Please provide the type of the seat'],
+        },
+        occupied: {
+            type: Boolean,
+            default: false,
+        }
+    },{ _id : false});
+```
 
 ### Database operations <div id="operations"></div>
 #### 1. user
@@ -596,7 +626,7 @@
         }
     }
 ```
-#### 6. order //TODO
+#### 6. order 
 
 
 ### Endpoints
