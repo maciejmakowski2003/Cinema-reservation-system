@@ -1,5 +1,4 @@
 const Movie = require('../models/movie');
-const AppError = require('../utils/error');
 const MovieUtils = require('../utils/movie');
 const movieUtils = new MovieUtils(Movie);
 
