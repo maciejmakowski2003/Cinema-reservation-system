@@ -26,10 +26,10 @@ const getUserOrders = async (req, res) => {
     }
 }
 
-const getMontlyIncome = async (req, res) => {
+const getCinemaMonthlyIncome = async (req, res) => {
     try {
         const { cinema_id, month, year } = req.params;
-        const income = await orderUtils.getMontlyIncome(cinema_id, month, year);
+        const income = await orderUtils.getCinemaMontlyIncome(cinema_id, month, year);
 
         res.status(200).json({ income });
     } catch (error) {
@@ -37,4 +37,15 @@ const getMontlyIncome = async (req, res) => {
     }
 }
 
-module.exports = { createOrder, getUserOrders, getMontlyIncome };
+const getCinemaMonthlyIncomeForEachMovie = async (req, res) => {
+    try {
+        const { cinema_id, month, year } = req.params;
+        const income = await orderUtils.getCinemaMonthlyIncomeForEachMovie(cinema_id, month, year);
+
+        res.status(200).json(income);
+    } catch (error) {
+        res.status(error.status || 400).json({ message: error.message });
+    }
+}
+
+module.exports = { createOrder, getUserOrders, getCinemaMonthlyIncome, getCinemaMonthlyIncomeForEachMovie };

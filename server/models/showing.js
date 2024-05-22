@@ -73,6 +73,6 @@ showingSchema.statics.findByCinemaAndDate = function(cinema_id, date) {
         .sort({ movie_name: 1, start_date: 1 }).select({ seats: 0 });
 };
 
-showingSchema.index({ cinema_id: 1, movie_id: 1, start_date: 1 }, { unique: true })
+showingSchema.index({ cinema_id: 1, start_date: 1, movie_name: 1 }, { unique: false })
 
 module.exports = mongoose.model('Showing', showingSchema);

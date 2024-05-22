@@ -33,4 +33,6 @@ const orderSchema = new Schema({
     }
 },{timestamps: true});
 
+orderSchema.index({ showing_id: 1, createdAt: 1 }, {unique: false});
+
 module.exports = mongoose.model('Order', orderSchema);

@@ -59,7 +59,7 @@ class OrderUtils {
         return orders;
     }
 
-    async getMontlyIncome(cinema_id, month, year) {
+    async getCinemaMonthlyIncome(cinema_id, month, year) {
         const showings = await this.Showing.find({cinema_id}).exec();
 
         const firstDay = new Date(year, month -1, 1);
@@ -75,6 +75,32 @@ class OrderUtils {
             }
         }
         return income.toFixed(2);
+    }
+
+    async getCinemaMonthlyIncomeForEachMovie(cinema_id, month, year) {
+        const showings = await this.Showing.find({cinema_id}).exec();
+
+        const firstDay = new Date(year, month -1, 1);
+        firstDay.setHours(23, 59, 59, 9999);
+        const lastDay = new Date(year, month, 1);
+        lastDay.setHours(0,0,0,1);
+
+        let totalIncome = 0;
+        let moviesIncome = {};
+        for (let showing of showings) {
+            const orders = await this.Order.find({showing_id: showing._id, createdAt: { $gte: firstDay, $lt: lastDay } }).exec();
+            for (let order of orders) {
+                if(!moviesIncome[showing.movie_name]) {
+                    moviesIncome[showing.movie_name] = 0;
+                }
+                moviesIncome[showing.movie_name] += order.total_price;
+                totalIncome += order.total_price;
+            }
+        }
+        return {
+            moviesIncome,
+            totalIncome: totalIncome.toFixed(2),
+        };
     }
 }
 
