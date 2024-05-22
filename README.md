@@ -438,27 +438,10 @@
             if (!showing) {
                 throw new AppError(`Showing with id: ${showing_id} not found`, 404);
             }
-    
-            const showingSeats = showing.seats;
-            const showingPrice = showing.price;
-            let chosenSeats = [];
-            let totalPrice = 0;
-    
-            for (let seat of seats) {
-                const seatIndex = showingSeats.findIndex(s => s.row == seat.row && s.number == seat.number);
-                if (seatIndex === -1) {
-                    throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
-                }
-    
-                if (showingSeats[seatIndex].occupied) {
-                    throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
-                }
 
-                totalPrice += showingPrice[showingSeats[seatIndex].type];
-                chosenSeats.push(showingSeats[seatIndex]);
-            }
+            user.cart = {};
+            user.cart = await this.showingUtils.checkSeatsAvailability(showing, seats);
     
-            user.cart = { showing_id, seats: chosenSeats, total_price: totalPrice.toFixed(2)};
             await user.save({ session });
     
             await session.commitTransaction();
@@ -626,7 +609,108 @@
         }
     }
 ```
+```js
+    async checkSeatsAvailability(showing, seats) {
+        try {            
+            const showingSeats = showing.seats;
+            const showingPrice = showing.price;
+            let chosenSeats = [];
+            let totalPrice = 0;
+
+            for (let seat of seats) {
+                const seatIndex = showingSeats.findIndex(s => s.row == seat.row && s.number == seat.number);
+                if (seatIndex === -1) {
+                    throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
+                }
+
+                if (showingSeats[seatIndex].occupied) {
+                    throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
+                }
+
+                totalPrice += showingPrice[showingSeats[seatIndex].type];
+                chosenSeats.push(showingSeats[seatIndex]);
+            }
+
+            return { 
+                showing_id: showing._id, 
+                seats: chosenSeats, 
+                total_price: totalPrice.toFixed(2)
+            };
+
+        } catch(error) {
+            throw new AppError(error, 400);
+        }
+    }
+```
 #### 6. order 
+```js
+    async createOrder(user_id) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            const user = await this.User.findById(user_id).session(session);
+            if(!user) {
+                throw new AppError('User not found', 404);
+            }
+
+            const cart = user.cart;
+            if(cart.showing_id === null || cart.seats.length === 0) {
+                throw new AppError('Cart is empty', 400);
+            }
+
+            const showing = await this.Showing.findById(cart.showing_id).session(session);
+            if(!showing) {
+                throw new AppError('Showing not found', 404);
+            }
+
+            const {showing_id, seats, total_price} = await this.showingUtils.checkSeatsAvailability(showing, cart.seats);
+
+            for(let seat of seats) {
+                showing.seats.find(s => s.row == seat.row && s.number == seat.number).occupied = true;
+            }
+
+            await showing.save({session});
+
+            await this.Order.create([{user_id, showing_id, tickets: seats, total_price}],{session: session});
+
+            user.cart = {showing_id: null, seats: [], total_price: 0};
+            await user.save({session});
+
+            await session.commitTransaction();
+            session.endSession();           
+        } catch(error) {
+            await session.abortTransaction();
+            session.endSession();
+            throw new AppError(error, 400);
+        }
+    }
+```
+```js
+    async getUserOrders(user_id) {
+        const orders = await this.Order.find({user_id}).sort({createdAt: -1}).exec();
+        return orders;
+    }
+```
+```js
+    async getMontlyIncome(cinema_id, month, year) {
+        const showings = await this.Showing.find({cinema_id}).exec();
+
+        const firstDay = new Date(year, month -1, 1);
+        firstDay.setHours(23, 59, 59, 9999);
+        const lastDay = new Date(year, month, 1);
+        lastDay.setHours(0,0,0,1);
+        
+        let income = 0;
+        for (let showing of showings) {
+            const orders = await this.Order.find({showing_id: showing._id, createdAt: { $gte: firstDay, $lt: lastDay } }).exec();
+            for (let order of orders) {
+                income += order.total_price;
+            }
+        }
+        return income.toFixed(2);
+    }
+```
 
 
 ### Endpoints
@@ -1145,8 +1229,74 @@ Result:
   ]
 }
 ```   
+#### 5. order
+```js
+API_ROUTE = /orders
+```
 
-### TODO
-- place an order(update seats occupation to true, create order)
-- monthly income for each cinema and total
-- access control to available seats
+##### Get user's orders
+Endpoint:
+```js
+    GET ${API_ROUTE}/user
+```
+Headers:
+```js
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGIzNmM2NGEwNjIxZGYyZTMxZGQzOCIsImlhdCI6MTcxNjIwNTQyNiwiZXhwIjoxNzE2NDY0NjI2fQ.zi0UNmCzz9UcarmtAC-dkWxDEq9VXAHxotJwMNuHVF0
+```
+Result:
+```js
+[
+  {
+    "_id": "664db4b22412bad31108652e",
+    "user_id": "664b36c64a0621df2e31dd38",
+    "showing_id": "664b934f13a8d8ec6a9051cd",
+    "tickets": [
+      {
+        "row": "A",
+        "number": "0",
+        "type": "standard",
+        "occupied": true
+      },
+      {
+        "row": "B",
+        "number": "0",
+        "type": "standard",
+        "occupied": true
+      }
+    ],
+    "total_price": 39.98,
+    "createdAt": "2024-05-22T09:02:42.262Z",
+    "updatedAt": "2024-05-22T09:02:42.262Z",
+    "__v": 0
+  }
+]
+```
+
+##### Get cinema's montly income
+Endpoint:
+```js
+    GET ${API_ROUTE}/income/cinema/:cinema_id/month/:month/year/:year
+```
+
+Result:
+```js
+{
+  "income": 39.98
+}
+```
+
+##### Post order
+Endpoint:
+```js
+    POST ${API_ROUTE}
+```
+Headers:
+```js
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGIzNmM2NGEwNjIxZGYyZTMxZGQzOCIsImlhdCI6MTcxNjIwNTQyNiwiZXhwIjoxNzE2NDY0NjI2fQ.zi0UNmCzz9UcarmtAC-dkWxDEq9VXAHxotJwMNuHVF0
+```
+Result:
+```js
+{
+  "message": "Order created"
+}
+```

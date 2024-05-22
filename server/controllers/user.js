@@ -1,7 +1,9 @@
 const User = require('../models/user');
 const Showing = require('../models/showing');
+const Movie = require('../models/movie');
+const Hall = require('../models/hall');
 const UserUtils = require('../utils/user');
-const userUtils = new UserUtils(User, Showing);
+const userUtils = new UserUtils(User, Showing, Movie, Hall);
 
 const signup = async (req, res) => {
     try {

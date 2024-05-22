@@ -1,11 +1,13 @@
 const {createToken} = require('../utils/token');
 const AppError = require('../utils/error');
 const mongoose = require('mongoose');
+const ShowingUtils = require('./showing');
 
 class UserUtils {
-    constructor(User, Showing) {
+    constructor(User, Showing, Movie, Hall) {
         this.User = User;
         this.Showing = Showing;
+        this.showingUtils = new ShowingUtils(Showing, Movie, Hall);
     }
 
     async signup(email, password) {
@@ -72,29 +74,10 @@ class UserUtils {
             if (!showing) {
                 throw new AppError(`Showing with id: ${showing_id} not found`, 404);
             }
-    
-            const showingSeats = showing.seats;
-            const showingPrice = showing.price;
-            let chosenSeats = [];
-            let totalPrice = 0;
-    
-            for (let seat of seats) {
-                const seatIndex = showingSeats.findIndex(s => s.row == seat.row && s.number == seat.number);
-                if (seatIndex === -1) {
-                    throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
-                }
-    
-                if (showingSeats[seatIndex].occupied) {
-                    throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
-                }
-
-                totalPrice += showingPrice[showingSeats[seatIndex].type];
-                chosenSeats.push(showingSeats[seatIndex]);
-            }
 
             user.cart = {};
+            user.cart = await this.showingUtils.checkSeatsAvailability(showing, seats);
     
-            user.cart = { showing_id, seats: chosenSeats, total_price: totalPrice.toFixed(2)};
             await user.save({ session });
     
             await session.commitTransaction();
