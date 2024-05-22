@@ -3,6 +3,13 @@ const { Schema } = mongoose;
 const seatScheme = require('./seat');
 const bcrypt = require('bcryptjs');
 
+const priceValidator = {
+    validator: function (value) {
+        return value >= 0;
+    },
+    message: props => `${props.value} is not a valid price. Please provide a price greater than or equal to 0.`
+};
+
 const userSchema = new Schema({
     email: {
         type: String,
@@ -35,6 +42,12 @@ const userSchema = new Schema({
             type: [seatScheme],
             default: []
         },
+        total_price: {
+            type: Number,
+            required: true,
+            validate: priceValidator,
+            default: 0
+        }
     }
 });
 

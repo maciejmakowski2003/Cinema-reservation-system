@@ -21,6 +21,13 @@
 #### 1. user
    - each document stores information about single user.
    ```js
+    const priceValidator = {
+        validator: function (value) {
+            return value >= 0;
+        },
+        message: props => `${props.value} is not a valid price. Please provide a price greater than or equal to 0.`
+    };
+    
     const userSchema = new Schema({
         email: {
             type: String,
@@ -53,6 +60,12 @@
                 type: [seatScheme],
                 default: []
             },
+            total_price: {
+                type: Number,
+                required: true,
+                validate: priceValidator,
+                default: 0
+        }
         }
     });
    ```
@@ -397,9 +410,12 @@
             }
     
             const showingSeats = showing.seats;
+            const showingPrice = showing.price;
+            let chosenSeats = [];
+            let totalPrice = 0;
     
             for (let seat of seats) {
-                const seatIndex = showingSeats.findIndex(s => s.row === seat.row && s.number === seat.number);
+                const seatIndex = showingSeats.findIndex(s => s.row == seat.row && s.number == seat.number);
                 if (seatIndex === -1) {
                     throw new AppError(`Seat ${seat.row}${seat.number} not found`, 404);
                 }
@@ -407,9 +423,12 @@
                 if (showingSeats[seatIndex].occupied) {
                     throw new AppError(`Seat ${seat.row}${seat.number} is already occupied`, 400);
                 }
+
+                totalPrice += showingPrice[showingSeats[seatIndex].type];
+                chosenSeats.push(showingSeats[seatIndex]);
             }
     
-            user.cart = { showing_id, seats };
+            user.cart = { showing_id, seats: chosenSeats, total_price: totalPrice.toFixed(2)};
             await user.save({ session });
     
             await session.commitTransaction();
