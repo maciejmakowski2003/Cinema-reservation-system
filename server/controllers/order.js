@@ -3,8 +3,9 @@ const Showing = require('../models/showing');
 const Movie = require('../models/movie');
 const Hall = require('../models/hall');
 const User = require('../models/user');
+const Cinema = require('../models/cinema');
 const OrderUtils = require('../utils/order');
-const orderUtils = new OrderUtils(Order, Showing, Movie, Hall, User);
+const orderUtils = new OrderUtils(Order, Showing, Movie, Hall, User, Cinema);
 
 const createOrder = async (req, res) => {
     try {
@@ -26,21 +27,10 @@ const getUserOrders = async (req, res) => {
     }
 }
 
-const getCinemaMonthlyIncome = async (req, res) => {
+const getMonthlyIncomeForEachMovie = async (req, res) => {
     try {
-        const { cinema_id, month, year } = req.params;
-        const income = await orderUtils.getCinemaMontlyIncome(cinema_id, month, year);
-
-        res.status(200).json({ income });
-    } catch (error) {
-        res.status(error.status || 400).json({ message: error.message });
-    }
-}
-
-const getCinemaMonthlyIncomeForEachMovie = async (req, res) => {
-    try {
-        const { cinema_id, month, year } = req.params;
-        const income = await orderUtils.getCinemaMonthlyIncomeForEachMovie(cinema_id, month, year);
+        const { month, year } = req.params;
+        const income = await orderUtils.getMonthlyIncomeForEachMovie(month, year);
 
         res.status(200).json(income);
     } catch (error) {
@@ -48,4 +38,16 @@ const getCinemaMonthlyIncomeForEachMovie = async (req, res) => {
     }
 }
 
-module.exports = { createOrder, getUserOrders, getCinemaMonthlyIncome, getCinemaMonthlyIncomeForEachMovie };
+const getMonthlyNumberOfBookedTicketsForEachCinema = async (req, res) => {
+    try {
+        const { month, year } = req.params;
+        const income = await orderUtils.getMonthlyNumberOfBookedTicketsForEachCinema(month, year);
+
+        res.status(200).json(income);
+    } catch(error) {
+        res.status(error.status || 400).json({ message: error.message });    
+    }
+}
+
+
+module.exports = { createOrder, getUserOrders, getMonthlyIncomeForEachMovie, getMonthlyNumberOfBookedTicketsForEachCinema };

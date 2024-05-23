@@ -156,6 +156,30 @@ const openingHoursSchema = new Schema({
     sunday: timeSchema,
 },{ _id : false});
 ```
+```js
+const addressSchema = new Schema({
+    street: {
+        type: String,
+        required: [true, 'Please provide the street']
+    },
+    city: {
+        type: String,
+        required: [true, 'Please provide the city']
+    },
+    state: {
+        type: String,
+        required: [true, 'Please provide the state']
+    },
+    country: {
+        type: String,
+        required: [true, 'Please provide the country']
+    },
+    zipcode: {
+        type: String,
+        required: [true, 'Please provide the zipcode'],
+    }
+}, { _id: false });
+```
 ```json
 {
   "_id": {
@@ -767,107 +791,149 @@ async checkSeatsAvailability(showing, seats) {
 ```
 
 ### Reporting operation 1<div id="reporting1"></div>
-###### Find movies by average review score higher then given
+###### Get m onthly income for eac movie
 Endpoint:
 ```js
-    GET movies/review/:score
+    GET orders/income/month/:month/year/:year/movies
 ```
 Sample result:
 ```js
-[
+{
+  "moviesIncome": [
     {
-        "_id": "664b2d5429a4bf79500e5dcf",
-        "title": "The Matrix",
-        "description": "A computer hacker learns about the true nature of reality and his role in the war against its controllers.",
-        "runtime": 136,
-        "reviews": [4, 5, 5],
-        "__v": 3,
-        "averageReview": 4.666666666666667
+      "_id": "The Matrix",
+      "movieIncome": 153.98
     },
     {
-        "_id": "664b2d93e6922309f8189d4d",
-        "title": "Inception",
-        "description": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-        "runtime": 148,
-        "reviews": [5, 5, 5],
-        "__v": 3,
-        "averageReview": 5
-    },
-    {
-        "_id": "664b2d93e6922309f8189d4e",
-        "title": "Interstellar",
-        "description": "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-        "runtime": 169,
-        "reviews": [5],
-        "__v": 1,
-        "averageReview": 5
+      "_id": "Inception",
+      "movieIncome": 39.98
     }
-]
+  ],
+  "totalIncome": "193.96"
+}
 ```
 Functions:
 ```js
-//find movies by average review score
-movieSchema.statics.findByAverageReviewScore = function(score) {
-    return this.aggregate([
-        { $addFields: { averageReview: { $avg: "$reviews" } } },
-        { $match: { averageReview: { $gte: score } } }
-    ]);
-};
-```
-```js
-//get all movies with higher average review score than given
-async getMoviesByReviewScore(score) {
+async getMonthlyIncomeForEachMovie(month, year) {
+    const firstDay = new Date(year, month -1, 1);
+    firstDay.setHours(23, 59, 59, 9999);
+    const lastDay = new Date(year, month, 1);
+    lastDay.setHours(0,0,0,1);
+
     try {
-        return await this.Movie.findByAverageReviewScore(score);
-    } catch (error) {
+        const moviesIncome = await this.Movie.aggregate([
+            {
+                $lookup: {
+                from: "showings",
+                localField: "_id",
+                foreignField: "movie_id",
+                as: "showing"
+                }
+            },
+            {
+                $unwind: "$showing"
+            },
+            {
+                $lookup: {
+                from: "orders",
+                localField: "showing._id",
+                foreignField: "showing_id",
+                as: "order"
+                }
+            },
+            {
+                $unwind: "$order"
+            },
+            {
+                $match: {
+                    "order.createdAt": {
+                        $gte: firstDay,
+                        $lt: lastDay
+                    }
+                }
+            },
+            {
+                $group: {
+                _id:  "$title", 
+                movieIncome: { $sum: "$order.total_price"}
+                }
+            },
+        ]);
+
+        const totalIncome = moviesIncome.reduce((acc, movie) => acc + movie.movieIncome, 0);
+
+        return {
+            moviesIncome,
+            totalIncome: totalIncome.toFixed(2),
+        };
+    } catch(error) {
         throw new AppError(error, 400);
     }
 }
 ```
 
 ### Reporting operation 2<div id="reporting2"></div>
-###### Get cinema income in given month for each movie
+###### Get monthly number of booked tickets for each cinema
 Endpoint:
 ```js
-GET orders/income/cinema/:cinema_id/month/:month/year/:year/movies
+GET orders/tickets/month/:month/year/:year/cinemas
 ```
 Sample result:
 ```js
-{
-  "moviesIncome": {
-    "The Matrix": 153.98,
-    "Inception": 39.98
-  },
-  "totalIncome": "193.96"
-}
+[
+  {
+    "_id": "Multikino Kraków Dobrego pasterza",
+    "bookedTickets": 8
+  }
+]
 ```
 Functions:
 ```js
-//Get monthly income for each movie in given cinema
-async getCinemaMonthlyIncomeForEachMovie(cinema_id, month, year) {
-    const showings = await this.Showing.find({cinema_id}).exec();
-
+async getMonthlyNumberOfBookedTicketsForEachCinema(month, year) {
     const firstDay = new Date(year, month -1, 1);
     firstDay.setHours(23, 59, 59, 9999);
     const lastDay = new Date(year, month, 1);
     lastDay.setHours(0,0,0,1);
 
-    let totalIncome = 0;
-    let moviesIncome = {};
-    for (let showing of showings) {
-        const orders = await this.Order.find({showing_id: showing._id, createdAt: { $gte: firstDay, $lt: lastDay } }).exec();
-        for (let order of orders) {
-            if(!moviesIncome[showing.movie_name]) {
-                moviesIncome[showing.movie_name] = 0;
+    try {
+        const result = this.Cinema.aggregate([
+            {
+                $lookup: {
+                from: "showings",
+                localField: "_id",
+                foreignField: "cinema_id",
+                as: "showing"
+                }
+            },
+            {
+                $unwind: "$showing"
+            },
+            {
+                $project: {
+                cinemaName: "$name",
+                tickets: {
+                    $size: {
+                    $filter: {
+                        input: "$showing.seats",
+                        as: "seat",
+                        cond: { $eq: ["$$seat.occupied", true] }
+                    }
+                    }
+                }
+                }
+            },
+            {
+                $group: {
+                _id: "$cinemaName",
+                bookedTickets: { $sum: "$tickets"}
+                }
             }
-            moviesIncome[showing.movie_name] += order.total_price;
-            totalIncome += order.total_price;
-        }
+        ]);
+
+        return result;
+    } catch(error) {
+        throw new AppError(error, 400);
     }
-    return {
-        moviesIncome,
-        totalIncome: totalIncome.toFixed(2)
-    };
 }
 ```
 

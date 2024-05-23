@@ -3,12 +3,13 @@ const mongoose = require('mongoose');
 const ShowingUtils = require('./showing');
 
 class OrderUtils {
-    constructor(Order, Showing, Movie, Hall, User) {
+    constructor(Order, Showing, Movie, Hall, User, Cinema) {
         this.Order = Order;
         this.Showing = Showing;
         this.Movie = Movie;
         this.Hall = Hall;
         this.User = User;
+        this.Cinema = Cinema;
         this.showingUtils = new ShowingUtils(Showing, Movie, Hall);
     }
 
@@ -59,48 +60,108 @@ class OrderUtils {
         return orders;
     }
 
-    async getCinemaMonthlyIncome(cinema_id, month, year) {
-        const showings = await this.Showing.find({cinema_id}).exec();
-
+    async getMonthlyIncomeForEachMovie(month, year) {
         const firstDay = new Date(year, month -1, 1);
         firstDay.setHours(23, 59, 59, 9999);
         const lastDay = new Date(year, month, 1);
         lastDay.setHours(0,0,0,1);
 
-        let income = 0;
-        for (let showing of showings) {
-            const orders = await this.Order.find({showing_id: showing._id, createdAt: { $gte: firstDay, $lt: lastDay } }).exec();
-            for (let order of orders) {
-                income += order.total_price;
-            }
+        try {
+            const moviesIncome = await this.Movie.aggregate([
+                {
+                    $lookup: {
+                    from: "showings",
+                    localField: "_id",
+                    foreignField: "movie_id",
+                    as: "showing"
+                    }
+                },
+                {
+                    $unwind: "$showing"
+                },
+                {
+                    $lookup: {
+                    from: "orders",
+                    localField: "showing._id",
+                    foreignField: "showing_id",
+                    as: "order"
+                    }
+                },
+                {
+                    $unwind: "$order"
+                },
+                {
+                    $match: {
+                        "order.createdAt": {
+                            $gte: firstDay,
+                            $lt: lastDay
+                        }
+                    }
+                },
+                {
+                    $group: {
+                    _id:  "$title", 
+                    movieIncome: { $sum: "$order.total_price"}
+                    }
+                },
+            ]);
+
+            const totalIncome = moviesIncome.reduce((acc, movie) => acc + movie.movieIncome, 0);
+
+            return {
+                moviesIncome,
+                totalIncome: totalIncome.toFixed(2),
+            };
+        } catch(error) {
+            throw new AppError(error, 400);
         }
-        return income.toFixed(2);
     }
 
-    async getCinemaMonthlyIncomeForEachMovie(cinema_id, month, year) {
-        const showings = await this.Showing.find({cinema_id}).exec();
-
+    async getMonthlyNumberOfBookedTicketsForEachCinema(month, year) {
         const firstDay = new Date(year, month -1, 1);
         firstDay.setHours(23, 59, 59, 9999);
         const lastDay = new Date(year, month, 1);
         lastDay.setHours(0,0,0,1);
 
-        let totalIncome = 0;
-        let moviesIncome = {};
-        for (let showing of showings) {
-            const orders = await this.Order.find({showing_id: showing._id, createdAt: { $gte: firstDay, $lt: lastDay } }).exec();
-            for (let order of orders) {
-                if(!moviesIncome[showing.movie_name]) {
-                    moviesIncome[showing.movie_name] = 0;
+        try {
+            const result = this.Cinema.aggregate([
+                {
+                    $lookup: {
+                    from: "showings",
+                    localField: "_id",
+                    foreignField: "cinema_id",
+                    as: "showing"
+                    }
+                },
+                {
+                    $unwind: "$showing"
+                },
+                {
+                    $project: {
+                    cinemaName: "$name",
+                    tickets: {
+                        $size: {
+                        $filter: {
+                            input: "$showing.seats",
+                            as: "seat",
+                            cond: { $eq: ["$$seat.occupied", true] }
+                        }
+                        }
+                    }
+                    }
+                },
+                {
+                    $group: {
+                    _id: "$cinemaName",
+                    bookedTickets: { $sum: "$tickets"}
+                    }
                 }
-                moviesIncome[showing.movie_name] += order.total_price;
-                totalIncome += order.total_price;
-            }
+            ]);
+
+            return result;
+        } catch(error) {
+            throw new AppError(error, 400);
         }
-        return {
-            moviesIncome,
-            totalIncome: totalIncome.toFixed(2),
-        };
     }
 }
 
