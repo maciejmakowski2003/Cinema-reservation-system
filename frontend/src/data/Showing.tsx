@@ -1,6 +1,7 @@
 import Seat from "./Seat";
 
 export default interface Showing {
+    _id: string;
     cinema_id: string;
     movie_id: string;
     start_date: Date;

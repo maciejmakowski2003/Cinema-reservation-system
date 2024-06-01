@@ -2,63 +2,32 @@ import React from "react";
 import Seat from "../data/Seat";
 
 interface SeatContextState {
-    seats: Seat[];
     selectedSeats: Seat[];
-    selectSeat: (seat: Seat) => void;
-    unselectSeat: (seat: Seat) => void;
+    setSelectedSeats: (selectedSeats: Seat[]) => void;
+    cartItems: CartItem[];
+    setCartItems: (cartItems: CartItem[]) => void;
+    addToCart: (showing_id: string, seats: Seat[]) => void;
+}
+
+interface CartItem {
+    showing_id: string;
+    seats: Seat[];
 }
 
 const SeatContext = React.createContext<SeatContextState | undefined>(undefined);
 
 const SeatPickerProvider: React.FC = ({ children }) => {
-    const [seats, setSeats] = React.useState<Seat[]>([
-        {
-            row: "A",
-            number: 1,
-            occupied: false,
-            type: "standard"
-        },
-        {
-            row: "A",
-            number: 2,
-            occupied: false,
-            type: "vip"
-        },
-        {
-            row: "A",
-            number: 3,
-            occupied: true,
-            type: "standard"
-        },
-        {
-            row: "A",
-            number: 4,
-            occupied: true,
-            type: "vip"
-        },
-        {
-            row: "M",
-            number: 14,
-            occupied: true,
-            type: "vip"
-        }
-    ]);
+
     const [selectedSeats, setSelectedSeats] = React.useState<Seat[]>([]);
+    const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
 
-    React.useEffect(() => {
-
-    }, []);
-
-    const selectSeat = (seat: Seat) => {
-        setSelectedSeats([...selectedSeats, seat]);
-    }
-
-    const unselectSeat = (seat: Seat) => {
-        setSelectedSeats(selectedSeats.filter(selectedSeat => !(selectedSeat.number === seat.number && selectedSeat.row === seat.row)));
+    const addToCart = (showing_id: string, seats: Seat[]) => {
+        const newCartItem = { showing_id, seats };
+        setCartItems([...cartItems, newCartItem]);
     }
 
     return (
-        <SeatContext.Provider value={{ seats, selectedSeats, selectSeat, unselectSeat }}>
+        <SeatContext.Provider value={{ selectedSeats, setSelectedSeats, cartItems, setCartItems, addToCart }}>
             {children}
         </SeatContext.Provider>
     );

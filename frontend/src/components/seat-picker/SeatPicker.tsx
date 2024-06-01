@@ -1,15 +1,29 @@
 import Seat from "../../data/Seat"
-import useSeats from "../../providers/SeatProvider"
+import Showing from "../../data/Showing"
 import "./seatPicker.scss"
+import useSeats from "../../providers/SeatProvider"
 
-const SeatPicker = () => {
+type Props = {
+    showing: Showing
+
+}
+
+const SeatPicker = ({ showing }: Props) => {
     const rows = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"]
-    const columns = Array.from({ length: 20 }, (_, i) => i + 1)
-    const { seats, selectSeat, unselectSeat, selectedSeats } = useSeats()
+    const columns = Array.from({ length: 20 }, (_, i) => i)
+    // const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
+    const { selectedSeats, setSelectedSeats } = useSeats()
+    const selectSeat = (seat: Seat) => {
+        setSelectedSeats([...selectedSeats, seat]);
+    }
+
+    const unselectSeat = (seat: Seat) => {
+        setSelectedSeats(selectedSeats.filter(selectedSeat => !(selectedSeat.number === seat.number && selectedSeat.row === seat.row)));
+    }
 
     const seatClickHandler = (seat: Seat) => {
         if (seat.occupied) return;
-        if (selectedSeats.find(selectedSeat => selectedSeat.number === seat.number && selectedSeat.row === seat.row)) {
+        if (selectedSeats.find(selectedSeat => selectedSeat.number == seat.number && selectedSeat.row === seat.row)) {
             unselectSeat(seat)
         }
         else {
@@ -26,9 +40,9 @@ const SeatPicker = () => {
                         {columns.map((column, columnIndex) => {
                             const hasOffset = columnIndex === 15
                             const seatId = `${row}${column}`
-                            const seat = seats.find(seat => seat.row === row && seat.number === column)
+                            const seat = showing.seats.find(seat => seat.row === row && seat.number == column)
                             const occupied = seat?.occupied
-                            const selected = selectedSeats.find(selectedSeat => selectedSeat.number === column && selectedSeat.row === row)
+                            const selected = selectedSeats.find(selectedSeat => selectedSeat.number == column && selectedSeat.row === row)
                             const vip = seat?.type === "vip"
                             return <div
                                 key={seatId} className={`seat ${hasOffset && 'seat-offset'} ${occupied && 'seat-occupied'} ${selected && 'seat-selected'}`}
