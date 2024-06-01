@@ -7,51 +7,62 @@ const showingSchema = new Schema({
     cinema_id: {
         type: Schema.Types.ObjectId,
         ref: 'Cinema',
-        required: true,
+        required: [true, 'Cinema ID is required'],
     },
     movie_id: {
         type: Schema.Types.ObjectId,
         ref: 'Movie',
-        required: true,
+        required: [true, 'Movie ID is required'],
+    },
+    movie_name: {
+        type: String,
+        required: [true, 'Movie name is required'],
     },
     start_date: {
         type: Date,
-        required: true,
+        required: [true, 'Start date is required'],
     },
     hall_id: {
         type: Schema.Types.ObjectId,
         ref: 'Hall',
-        required: true,
+        required: [true, 'Hall ID is required'],
     },
     price: {
         standard: {
             type: Number,
-            required: true,
+            required: [true, 'Standard price is required'],
         },
         vip: {
             type: Number,
-            required: true,
+            required: [true, 'VIP price is required'],
         },
     },
     format: {
         type: {
             type: String,
-            enum: ['2D', '3D', '4D'],
-            required: true,
+            enum: {
+                values: ['2D', '3D', '4D'],
+                message: 'Format type must be either 2D, 3D, or 4D',
+            },
+            required: [true, 'Format type is required'],
         },
         language: {
             type: String,
-            enum: ['subtitled', 'dubbed', 'original', 'voiceover'],
-            required: true,
+            enum: {
+                values: ['subtitled', 'dubbed', 'original', 'voiceover'],
+                message: 'Language must be subtitled, dubbed, original, or voiceover',
+            },
+            required: [true, 'Language is required'],
         }
     },
     seats: {
         type: [seatScheme],
-        required: true,
+        required: [true, 'Seats are required'],
     },
 });
 
-showingSchema.statics.findByCinemaIdAndDate = function(cinema_id, date) {
+
+showingSchema.statics.findByCinemaAndDate = function(cinema_id, date) {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -59,9 +70,9 @@ showingSchema.statics.findByCinemaIdAndDate = function(cinema_id, date) {
     endOfDay.setHours(23, 59, 59, 999);
 
     return this.find({ cinema_id, start_date: { $gte: startOfDay, $lt: endOfDay } })
-        .sort({ name: 1, start_date: 1 });
+        .sort({ movie_name: 1, start_date: 1 }).select({ seats: 0 });
 };
 
-showingSchema.index({ cinema_id: 1, movie_id: 1, start_date: 1 }, { unique: true })
+showingSchema.index({ cinema_id: 1, start_date: 1, movie_name: 1 }, { unique: false })
 
 module.exports = mongoose.model('Showing', showingSchema);

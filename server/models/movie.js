@@ -13,6 +13,7 @@ const validateReview = {
 const movieSchema = new Schema({
     title: {
         type: String,
+        unique: true,
         required: [true, 'Please provide the movie title'],
     },
     description: {
@@ -30,6 +31,8 @@ const movieSchema = new Schema({
         validate: validateReview,
     }
 });
+
+movieSchema.index({ title: 1 }, { unique: true });
 
 movieSchema.statics.findByAverageReviewScore = function(score) {
     return this.aggregate([

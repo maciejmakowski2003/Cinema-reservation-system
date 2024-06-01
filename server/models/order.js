@@ -29,7 +29,10 @@ const orderSchema = new Schema({
         type: Number,
         required: true,
         validate: priceValidator,
+        default: 0
     }
 },{timestamps: true});
+
+orderSchema.index({ showing_id: 1, createdAt: 1 }, {unique: false});
 
 module.exports = mongoose.model('Order', orderSchema);

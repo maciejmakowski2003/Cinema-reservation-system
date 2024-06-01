@@ -1,4 +1,4 @@
-const AppError = require('../utils/error');
+const AppError = require('./error');
 const mongoose = require('mongoose');
 const HallUtils = require('./hall');
 
