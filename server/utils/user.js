@@ -34,6 +34,15 @@ class UserUtils {
     };
   }
 
+  async getUserData(user_id) {
+    const user = await this.User.findById(user_id);
+    if (!user) {
+      throw new AppError(`User with id: ${user_id} not found`, 404);
+    }
+
+    return user;
+  }
+
   async updatePassword(user_id, oldPassword, newPassword) {
     const user = await this.User.findById(user_id);
     if (!user) {

@@ -44,6 +44,11 @@
     color: black;
 }
 
+.seat-in-cart {
+    background-color: #2793bd;
+    color: black;
+}
+
 .seat-offset {
     margin-left: 50px;
 }
@@ -53,7 +58,8 @@
     color: black;
 }
 
-.seat-occupied:hover {
+.seat-occupied:hover,
+.seat-in-cart:hover {
     background-color: #cfcfcf;
     cursor: not-allowed;
 }

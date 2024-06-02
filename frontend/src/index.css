@@ -10,7 +10,7 @@ body{
 #content{
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    /* justify-content: center; */
     align-items: center;
     min-height: 90vh;
     font-family: Verdana, Geneva, Tahoma, sans-serif;

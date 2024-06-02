@@ -40,8 +40,18 @@ const getHallSizeByShowingId = async (req, res) => {
   }
 };
 
+const getShowingById = async (req, res) => {
+  try {
+    const showing = await showingUtils.getShowingById(req.params.showing_id);
+    res.status(200).json(showing);
+  } catch (error) {
+    res.status(error.status || 400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getShowingsByCinemaAndDate,
   getShowingsByCinemaMovieDate,
   getHallSizeByShowingId,
+  getShowingById,
 };
