@@ -4,30 +4,20 @@ import Seat from "../data/Seat";
 interface SeatContextState {
     selectedSeats: Seat[];
     setSelectedSeats: (selectedSeats: Seat[]) => void;
-    cartItems: CartItem[];
-    setCartItems: (cartItems: CartItem[]) => void;
-    addToCart: (showing_id: string, seats: Seat[]) => void;
+
 }
 
-interface CartItem {
-    showing_id: string;
-    seats: Seat[];
+type Props = {
+    children: React.ReactNode;
 }
-
 const SeatContext = React.createContext<SeatContextState | undefined>(undefined);
 
-const SeatPickerProvider: React.FC = ({ children }) => {
-
+const SeatPickerProvider = ({ children }: Props) => {
     const [selectedSeats, setSelectedSeats] = React.useState<Seat[]>([]);
-    const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
 
-    const addToCart = (showing_id: string, seats: Seat[]) => {
-        const newCartItem = { showing_id, seats };
-        setCartItems([...cartItems, newCartItem]);
-    }
 
     return (
-        <SeatContext.Provider value={{ selectedSeats, setSelectedSeats, cartItems, setCartItems, addToCart }}>
+        <SeatContext.Provider value={{ selectedSeats, setSelectedSeats, }}>
             {children}
         </SeatContext.Provider>
     );

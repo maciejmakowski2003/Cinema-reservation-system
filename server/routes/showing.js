@@ -3,6 +3,7 @@ const {
   getShowingsByCinemaAndDate,
   getShowingsByCinemaMovieDate,
   getHallSizeByShowingId,
+  getShowingById,
 } = require("../controllers/showing");
 const router = Router();
 const API_ROUTE = "/showings";
@@ -16,5 +17,6 @@ router.get(
   getShowingsByCinemaMovieDate
 );
 router.get(`${API_ROUTE}/hall/:showing_id`, getHallSizeByShowingId);
+router.get(`${API_ROUTE}/:showing_id`, getShowingById);
 
 module.exports = router;

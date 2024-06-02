@@ -2,6 +2,7 @@ import Seat from "../../data/Seat"
 import Showing from "../../data/Showing"
 import "./seatPicker.scss"
 import useSeats from "../../providers/SeatProvider"
+import useCart from "../../providers/CartProvider"
 
 type Props = {
     showing: Showing
@@ -11,8 +12,8 @@ type Props = {
 const SeatPicker = ({ showing }: Props) => {
     const rows = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"]
     const columns = Array.from({ length: 20 }, (_, i) => i)
-    // const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
     const { selectedSeats, setSelectedSeats } = useSeats()
+    const { cart } = useCart()
     const selectSeat = (seat: Seat) => {
         setSelectedSeats([...selectedSeats, seat]);
     }
@@ -42,6 +43,7 @@ const SeatPicker = ({ showing }: Props) => {
                             const seatId = `${row}${column}`
                             const seat = showing.seats.find(seat => seat.row === row && seat.number == column)
                             const occupied = seat?.occupied
+                            // const inCart = cart?.seats.find(cartSeat => cartSeat.number == column && cartSeat.row == row && cartSeat.showing_id === showing._id)
                             const selected = selectedSeats.find(selectedSeat => selectedSeat.number == column && selectedSeat.row === row)
                             const vip = seat?.type === "vip"
                             return <div

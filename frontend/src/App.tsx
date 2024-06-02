@@ -9,6 +9,11 @@ import MoviesList from './components/movie/MoviesList';
 import CinemasList from './components/cinema/CinemasList';
 import { SeatPickerProvider } from './providers/SeatProvider';
 import Cart from './components/cart/Cart';
+import SignUp from './components/auth/SignUp';
+import { AuthProvider } from './providers/AuthProvider';
+import { SnackbarProvider } from './providers/SnackbarProvider';
+import SignIn from './components/auth/SignIn';
+import { CartProvider } from './providers/CartProvider';
 
 declare module '@mui/material/styles' {
   interface Theme {
@@ -16,7 +21,7 @@ declare module '@mui/material/styles' {
       danger: string;
     };
   }
-  // allow configuration using `createTheme`
+
   interface ThemeOptions {
     status?: {
       danger?: string;
@@ -45,23 +50,30 @@ function App() {
 
   return (
     <BrowserRouter>
-      <SeatPickerProvider>
-        <ThemeProvider theme={theme}>
-          <div id="App">
-            <ResponsiveAppBar />
-            <div id="content">
-              <Routes>
-                <Route path="/" element={<Hall />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/cinemas" element={<CinemasList />} />
-                <Route path="/movies" element={<MoviesList />} />
-                <Route path="/showings/:showingId" element={<Hall />} />
-              </Routes>
-            </div>
-          </div>
-        </ThemeProvider>
-      </SeatPickerProvider>
-
+      <AuthProvider>
+        <CartProvider>
+          <SnackbarProvider>
+            <SeatPickerProvider>
+              <ThemeProvider theme={theme}>
+                <div id="App">
+                  <ResponsiveAppBar />
+                  <div id="content">
+                    <Routes>
+                      <Route path="/" element={<Hall />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/cinemas" element={<CinemasList />} />
+                      <Route path="/movies" element={<MoviesList />} />
+                      <Route path="/sign-up" element={<SignUp />} />
+                      <Route path="/sign-in" element={<SignIn />} />
+                      <Route path="/showings/:showing_id" element={<Hall />} />
+                    </Routes>
+                  </div>
+                </div>
+              </ThemeProvider>
+            </SeatPickerProvider>
+          </SnackbarProvider>
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter >
   )
 }

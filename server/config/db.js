@@ -1,6 +1,6 @@
 module.exports = function (mongoose) {
     mongoose
-        .connect(process.env.MONGO_URI, {
+        .connect("mongodb+srv://admin_cinema:pusteniebo99@cluster.lp3lhuq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster", {
             dbName: 'cinema_reservation_system',
         })
         .then(() => {
