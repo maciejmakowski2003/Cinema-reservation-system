@@ -68,7 +68,6 @@ const SignIn = () => {
                         label="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        // fullWidth
                         margin="normal"
                         type="email"
                         required
@@ -78,7 +77,6 @@ const SignIn = () => {
                         label="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        // fullWidth
                         margin="normal"
                         type="password"
                         required

@@ -5,15 +5,10 @@ const Hall = require("../models/hall");
 const User = require("../models/user");
 const Cinema = require("../models/cinema");
 const OrderUtils = require("../utils/order");
-const { getUserIdFromToken } = require("../utils/token");
 const orderUtils = new OrderUtils(Order, Showing, Movie, Hall, User, Cinema);
 
 const createOrder = async (req, res) => {
   try {
-    // const user_id = getUserIdFromToken(
-    //   req.headers.authorization.split(" ")[1]
-    // );
-
     await orderUtils.createOrder(req.user_id);
 
     res.status(201).json({ message: "Order created" });

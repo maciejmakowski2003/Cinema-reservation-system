@@ -3,6 +3,7 @@ import { API_URL } from '../config';
 import useAuth from './AuthProvider';
 import Seat from "../data/Seat";
 import { createContext, useContext, useEffect, useState } from 'react';
+import useSnackbar from './SnackbarProvider';
 
 type Props = {
     children: React.ReactNode;
@@ -26,6 +27,7 @@ const CartContext = createContext<CartContextState | undefined>(undefined);
 const CartProvider = ({ children }: Props) => {
     const [cart, setCart] = useState<Cart | null>(null);
     const { user } = useAuth();
+    const { setText } = useSnackbar();
 
     const addToCart = async (showing_id: string, seats: Seat[]) => {
         const response = await axios.post(`${API_URL}/users/cart`, {
@@ -57,6 +59,7 @@ const CartProvider = ({ children }: Props) => {
             }
         })
         if (response.status !== 201) return
+        setText("Order created!")
         await fetchCart()
     }
 

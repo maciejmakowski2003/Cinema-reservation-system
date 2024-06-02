@@ -31,7 +31,7 @@ const Hall = () => {
 
         await addToCart(showing_id, selectedSeats)
         setSelectedSeats([])
-        setText(`Dodano miejsca ${selectedSeats.map(s => s.row + s.number).join(", ")} do koszyka, przekierowanie...`)
+        setText(`Added ${selectedSeats.map(s => s.row + s.number).join(", ")} to cart, redirecting...`)
         setTimeout(() => {
             navigate("/cart")
         }, 2000)
@@ -95,7 +95,7 @@ const Hall = () => {
                             sx={{ my: 2, color: 'white', display: 'block', backgroundColor: theme.palette.primary.main, ":hover": { backgroundColor: theme.palette.primary.dark } }}
                             onClick={addToCartHandler}
                         >
-                            Dodaj do koszyka
+                            add to cart
                         </Button>
                     </div>
                 </div>

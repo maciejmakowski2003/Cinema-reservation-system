@@ -50,29 +50,28 @@ function App() {
 
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <AuthProvider> <SnackbarProvider>
         <CartProvider>
-          <SnackbarProvider>
-            <SeatPickerProvider>
-              <ThemeProvider theme={theme}>
-                <div id="App">
-                  <ResponsiveAppBar />
-                  <div id="content">
-                    <Routes>
-                      <Route path="/" element={<Hall />} />
-                      <Route path="/cart" element={<Cart />} />
-                      <Route path="/cinemas" element={<CinemasList />} />
-                      <Route path="/movies" element={<MoviesList />} />
-                      <Route path="/sign-up" element={<SignUp />} />
-                      <Route path="/sign-in" element={<SignIn />} />
-                      <Route path="/showings/:showing_id" element={<Hall />} />
-                    </Routes>
-                  </div>
+          <SeatPickerProvider>
+            <ThemeProvider theme={theme}>
+              <div id="App">
+                <ResponsiveAppBar />
+                <div id="content">
+                  <Routes>
+                    <Route path="/" element={<Hall />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/cinemas" element={<CinemasList />} />
+                    <Route path="/movies" element={<MoviesList />} />
+                    <Route path="/sign-up" element={<SignUp />} />
+                    <Route path="/sign-in" element={<SignIn />} />
+                    <Route path="/showings/:showing_id" element={<Hall />} />
+                  </Routes>
                 </div>
-              </ThemeProvider>
-            </SeatPickerProvider>
-          </SnackbarProvider>
+              </div>
+            </ThemeProvider>
+          </SeatPickerProvider>
         </CartProvider>
+      </SnackbarProvider>
       </AuthProvider>
     </BrowserRouter >
   )

@@ -72,7 +72,6 @@ const SignUp = () => {
                         label="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        // fullWidth
                         margin="normal"
                         type="email"
                         required
@@ -82,7 +81,6 @@ const SignUp = () => {
                         label="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        // fullWidth
                         margin="normal"
                         type="password"
                         required
@@ -92,7 +90,6 @@ const SignUp = () => {
                         label="Confirm Password"
                         value={password2}
                         onChange={(e) => setPassword2(e.target.value)}
-                        // fullWidth
                         margin="normal"
                         type="password"
                         required

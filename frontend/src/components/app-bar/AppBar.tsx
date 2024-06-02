@@ -18,14 +18,11 @@ const pages = [
         title: "cinemas",
         route: "/cinemas",
     },
-    // {
-    //     title: "Movies",
-    //     route: "/movies"
-    // }
 ];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+
 
 function ResponsiveAppBar() {
+    const { logout } = useAuth();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
         null
     );
@@ -47,6 +44,11 @@ function ResponsiveAppBar() {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
+
+    const settings = [{
+        text: "Logout",
+        onClick: logout
+    }];
 
     return (
         <AppBar position="static">
@@ -164,8 +166,8 @@ function ResponsiveAppBar() {
                             onClose={handleCloseUserMenu}
                         >
                             {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
+                                <MenuItem key={setting.text} onClick={setting.onClick}>
+                                    <Typography textAlign="center">{setting.text}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>

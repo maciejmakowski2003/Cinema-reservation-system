@@ -28,7 +28,6 @@ const MovieCard: React.FC<Props> = ({ movie, showings }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                // height: 90
             }}>
                 <Typography gutterBottom variant="h5" component="div">
                     {movie.title}

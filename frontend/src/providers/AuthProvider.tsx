@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { API_URL } from "../config";
 import axios from "axios";
+import { removeToken } from "../utils";
 type Props = {
     children: React.ReactNode;
 }
@@ -9,6 +10,7 @@ interface AuthContextState {
     setUser: (user: User | null) => void;
     token: string | null;
     setToken: (token: string | null) => void;
+    logout: () => void;
 }
 
 interface User {
@@ -40,6 +42,12 @@ const AuthProvider = ({ children }: Props) => {
         }
     }
 
+    const logout = () => {
+        setUser(null);
+        setToken(null);
+        removeToken()
+    }
+
     useEffect(() => {
         (async function () {
             await getUserData()
@@ -47,7 +55,7 @@ const AuthProvider = ({ children }: Props) => {
     }, [])
 
     return (
-        <AuthContext.Provider value={{ user, setUser, token, setToken }}>
+        <AuthContext.Provider value={{ user, setUser, token, setToken, logout }}>
             {children}
         </AuthContext.Provider>
     );
