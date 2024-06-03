@@ -791,7 +791,7 @@ async checkSeatsAvailability(showing, seats) {
 ```
 
 ### Reporting operation 1<div id="reporting1"></div>
-###### Get m onthly income for eac movie
+###### Get monthly income for eac movie
 Endpoint:
 ```js
     GET orders/income/month/:month/year/:year/movies
@@ -895,40 +895,47 @@ async getMonthlyNumberOfBookedTicketsForEachCinema(month, year) {
     const lastDay = new Date(year, month, 1);
     lastDay.setHours(0,0,0,1);
 
+    console.log(firstDay, lastDay)
+
     try {
         const result = this.Cinema.aggregate([
             {
                 $lookup: {
-                from: "showings",
-                localField: "_id",
-                foreignField: "cinema_id",
-                as: "showing"
+                    from: "showings",
+                    localField: "_id",
+                    foreignField: "cinema_id",
+                    as: "showing"
                 }
             },
             {
                 $unwind: "$showing"
             },
             {
-                $project: {
-                cinemaName: "$name",
-                tickets: {
-                    $size: {
-                    $filter: {
-                        input: "$showing.seats",
-                        as: "seat",
-                        cond: { $eq: ["$$seat.occupied", true] }
-                    }
-                    }
+                $match: {
+                    "showing.start_date": { $gte: firstDay, $lt: lastDay }
                 }
+            },
+            {
+                $project: {
+                    cinemaName: "$name",
+                    tickets: {
+                        $size: {
+                            $filter: {
+                                input: "$showing.seats",
+                                as: "seat",
+                                cond: { $eq: ["$$seat.occupied", true] }
+                            }
+                        }
+                    }
                 }
             },
             {
                 $group: {
-                _id: "$cinemaName",
-                bookedTickets: { $sum: "$tickets"}
+                    _id: "$cinemaName",
+                    bookedTickets: { $sum: "$tickets" }
                 }
             }
-        ]);
+        ]);;
 
         return result;
     } catch(error) {
