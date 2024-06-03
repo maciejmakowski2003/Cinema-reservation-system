@@ -937,4 +937,17 @@ async getMonthlyNumberOfBookedTicketsForEachCinema(month, year) {
 }
 ```
 
-### UI demo <div id="demo"></div> //TODO
+### UI demo <div id="demo"></div>
+
+![](./img/ui12.png)
+![](./img/ui1.png)
+![](./img/ui2.png)
+![](./img/ui3.png)
+![](./img/ui4.png)
+![](./img/ui5.png)
+![](./img/ui6.png)
+![](./img/ui7.png)
+![](./img/ui8.png)
+![](./img/ui9.png)
+![](./img/ui10.png)
+![](./img/ui11.png)
